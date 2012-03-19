@@ -20,6 +20,7 @@
 			activeClass: 'active',
 			circular: false,
 			clonedClass: 'cloned',
+			cloneCount: 1,
 			disabledClass: 'disabled',
 			easing: 'swing',
 			initialIndex: 0,
@@ -133,8 +134,8 @@
 					next.removeClass("disabled");
 					
 				} else {
-					itemWrap.children().last().before(item);
-					itemWrap.children().first().replaceWith(item.clone().addClass(conf.clonedClass)); 						
+					itemWrap.children().eq(-(conf.cloneCount + 1)).after(item);
+					itemWrap.children().eq(conf.cloneCount).replaceWith(item.clone().addClass(conf.clonedClass));
 				}
 				
 				fire.trigger("onAddItem", [item]);
@@ -202,10 +203,8 @@
 		// circular loop
 		if (conf.circular) {
 			
-			var cloned1 = self.getItems().slice(-1).clone().prependTo(itemWrap),
-				 cloned2 = self.getItems().eq(1).clone().appendTo(itemWrap);
-
-			cloned1.add(cloned2).addClass(conf.clonedClass);
+			var cloned1 = self.getItems().slice(-conf.clonedCount).clone().prependTo(itemWrap).addClass(conf.clonedClass);
+			var cloned2 = self.getItems().slice(0,conf.clonedCount).clone().appendTo(itemWrap).addClass(conf.clonedClass);
 			
 			self.onBeforeSeek(function(e, i, time) {
 				
@@ -216,8 +215,8 @@
 					2. seek to correct position with 0 speed
 				*/
 				if (i == -1) {
-					self.seekTo(cloned1, time, function()  {
-						self.end(0);		
+					self.seekTo(cloned1.last(), time, function()  {
+						self.end(0);
 					});          
 					return e.preventDefault();
 					
